@@ -4,6 +4,10 @@ This is a template project for implementing distributed algorithms on AHCv2. By 
 
 ## Install AHCv2
 
+```pip3 install adhoccomputing```
+
+or alternatively,
+
 ```
 git clone https://github.com/cengwins/ahc.git
 cd ahc
@@ -21,6 +25,8 @@ There are some issues you have to address before starting implementation, please
 - user restructured text for documentation. There is a conf.py and the associated Makefile in the project's root directory. Running``make`` in the project's root directory will provide you a guide on how to build the html, pdf, epub, etc. documentation. 
 - do not edit anything in `build`, `_static`, `_templates` directories.  
 - in conf.py edit `project, copyright, author, release` fields.
+
+
 
 
 
