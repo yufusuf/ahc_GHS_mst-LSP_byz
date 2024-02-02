@@ -1,0 +1,23 @@
+﻿distalgname
+===========
+
+.. automodule:: distalgname
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

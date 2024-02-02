@@ -6,5 +6,6 @@ Implementation
    :toctree: generated
 
     tests
-
+   distalgname
+   Snapshot
 
