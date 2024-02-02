@@ -14,6 +14,13 @@ help:
 
 .PHONY: help Makefile
 
+# installs the ahc from github repo and deletes the folder
+ahc: ## installs the ahc from github repo and deletes the folder
+	rm -rf ahc
+	git clone https://github.com/cengwins/ahc.git
+	pushd ahc && pip3 install . && popd 
+	rm -rf ahc
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile

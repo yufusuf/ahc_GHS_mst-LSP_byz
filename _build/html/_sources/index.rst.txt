@@ -3,13 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Write the name of the Distributed Algorithm you are implementing
+.. include:: docs/distalgname/substitutions.rst
+
+|DistAlgName|
 =======================================================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+
+   docs/distalgname/distalgname.rst
 
 
 Indices and tables
