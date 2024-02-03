@@ -16,6 +16,10 @@
    docs/distalgname/distalgname.rst
 
 
+.. ATTENTION::
+   For RST details, please refer to `reStructuredText Documentation <https://docutils.sourceforge.io/rst.html>`_.
+
+
 Indices and tables
 ==================
 

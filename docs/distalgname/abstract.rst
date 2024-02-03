@@ -25,3 +25,9 @@ The Abstract is ONLY text. Use the active voice when possible, but much of it ma
 -  elliptical (i.e., ending with ...) or incomplete sentences,
 -  abbreviations or (mathematical) terms that may be confusing to readers,
 -  any sort of illustration, figure, or table, or references to them.
+
+
+
+.. admonition:: EXAMPLE 
+
+    In the realm of snapshot algorithms for distributed systems, the main challenge lies in capturing a consistent global state without disrupting ongoing processes and minimizing overhead. This encompasses managing concurrency, ensuring accurate message ordering, providing fault tolerance, optimizing efficiency, and maintaining scalability. Successfully addressing these challenges is crucial for designing snapshot algorithms that accurately reflect the system's state while preserving efficiency and resilience. Snapshot algorithms play a vital role in understanding and troubleshooting distributed systems, offering insights into system behavior, facilitating debugging, enabling efficient recovery from failures, and ensuring system correctness. Without such algorithms, diagnosing and resolving issues in distributed systems would be significantly hampered, potentially leading to increased downtime and inefficiencies. The Chandy-Lamport Algorithm, a key method for capturing consistent global snapshots, faces challenges in managing concurrency, ensuring accurate message ordering, and handling fault tolerance. Despite limitations such as increased message overhead and scalability concerns, it remains foundational in distributed systems research. In this paper, we contribute by implementing both the Chandy-Lamport and Lai-Yang Algorithms on the AHCv2 platform, investigating their performance across various scenarios, and conducting a comprehensive comparison to evaluate accuracy, overhead, complexity, and fault tolerance. SUMMARIZE MAIN LEARNING POINTS REFERING TO MAIN RESULTS!
