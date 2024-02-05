@@ -1,12 +1,20 @@
+"""
+Distributed Snapshot Algorithms
+
+This module implements Chandy Lamport and Lai Yang algorithms.
+"""
+
+
 from enum import Enum
 from adhoccomputing.Experimentation.Topology import Topology
 from adhoccomputing.GenericModel import GenericModel, GenericMessageHeader, GenericMessagePayload, GenericMessage
 from adhoccomputing.Generics import *
 from collections import defaultdict
 
-
 class SnapshotEventTypes(Enum):
-    # Take snapshot event
+    """ 
+    Take snapshot event
+    """ 
     TS = "TS"
 
 class SnapshotMessageTypes(Enum):
@@ -14,8 +22,15 @@ class SnapshotMessageTypes(Enum):
 
 
 class SnapshotComponentModel(GenericModel):
+    """
+    A generic snapshot component model to implement various snapshot algorithms.
 
+    Extend SnapshotComponentModel to implement your own snapshot algorithm.
+    """
     def __init__(self, componentname, componentinstancenumber, context=None, configurationparameters=None, num_worker_threads=1, topology=None):
+        """
+        Initializes the SnapshotComponentModel
+        """
         super().__init__(componentname, componentinstancenumber, context, configurationparameters, num_worker_threads, topology)
         self.state = None
         self.gsu_redirected_comps = set()
@@ -24,11 +39,10 @@ class SnapshotComponentModel(GenericModel):
         self.init_snapshot = False
         self.eventhandlers[SnapshotEventTypes.TS] = self.take_snapshot
 
-    # def connect_me_to_component(self, name, component):
-    #     raise Exception(f"Only channels are allowed for connection to"
-    #                     " {self.__class__}")
-
     def on_connected_to_component(self, name, channel):
+        """
+        on_connected_to_component is an event to address the channels
+        """
         super().on_connected_to_component(name, channel)
         self.chnls.add(channel.componentinstancenumber)
 
@@ -40,6 +54,9 @@ class SnapshotComponentModel(GenericModel):
         return from_chnl
 
     def on_pre_event(self, event):
+        """
+        PreEvent Handler
+        """
         return self.recv_events.append(event)
 
     def msg_recv(self, event: Event):

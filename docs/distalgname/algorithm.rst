@@ -5,10 +5,10 @@
 
 
 
-Background
-~~~~~~~~~~
+Background and Related Work
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Present any background information if needed.
+Present any background information survey the related work. Provide citations.
 
 Distributed Algorithm: |DistAlgName| 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,7 +59,7 @@ Present theoretic complexity results in terms of number of messages and computat
 
 .. admonition:: EXAMPLE 
 
-    Snapshot algorithms are fundamental tools in distributed systems, enabling the capture of consistent global states during system execution. These snapshots provide insights into the system's behavior, facilitating various tasks such as debugging, recovery from failures, and monitoring for properties like deadlock or termination. In this report, we delve into snapshot algorithms, focusing on two prominent ones: the Chandy-Lamport algorithm and the Lai-Yang algorithm. We will present the principles behind these algorithms, their implementation details, and compare their strengths and weaknesses.
+    Snapshot algorithms are fundamental tools in distributed systems, enabling the capture of consistent global states during system execution. These snapshots provide insights into the system's behavior, facilitating various tasks such as debugging, recovery from failures, and monitoring for properties like deadlock or termination. In this section, we delve into snapshot algorithms, focusing on two prominent ones: the Chandy-Lamport algorithm and the Lai-Yang algorithm. We will present the principles behind these algorithms, their implementation details, and compare their strengths and weaknesses.
 
     **Chandy-Lamport Snapshot Algorithm:**
 

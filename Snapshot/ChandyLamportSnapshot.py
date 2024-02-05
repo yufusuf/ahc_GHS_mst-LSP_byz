@@ -1,3 +1,7 @@
+"""
+The Chandy-Lamport Algorithm is a key method for capturing consistent global snapshots in distributed systems, comprising the initiation of marker propagation, recording of local states by processes upon marker reception, and subsequent snapshot reconstruction. It allows for the capture of snapshots without halting system execution, facilitating concurrent operations and serving various purposes like debugging and failure recovery. However, the algorithm exhibits limitations including increased message overhead due to marker propagation, challenges in managing concurrency which may affect snapshot accuracy, potential difficulties in handling faults during snapshot collection, and scalability concerns as system size grows. Despite these limitations, the Chandy-Lamport Algorithm remains foundational in distributed systems, driving further research in snapshot capture techniques.
+"""
+
 from enum import Enum
 from collections import defaultdict
 from adhoccomputing.Experimentation.Topology import Topology
@@ -5,11 +9,17 @@ from adhoccomputing.GenericModel import GenericModel, GenericMessageHeader,  Gen
 from adhoccomputing.Generics import *
 from Snapshot.Snapshot import SnapshotComponentModel, SnapshotMessageTypes, SnapshotEventTypes
 
+
+
 class ChandyLamportMessageTypes(Enum):
-    MARK = "MARK"
+    MARKER = "MARKER"
 
 
 class ChandyLamportState:
+    """
+    ChandyLamportState keeps track of states.
+    """
+
     def __init__(self, component, state, chnl_states):
         self.component_id = component
         self.component_state = []
@@ -21,8 +31,9 @@ class ChandyLamportState:
             self.chnl_states[c].append(s)
 
 class ChandyLamportComponentModel(SnapshotComponentModel):
-    """A ComponentModel that you can take a snapshot of using the
-    Chandy-Lamport algorithm"""
+    """
+    A ComponentModel that you can take a snapshot of using the Chandy-Lamport algorithm
+    """
 
     def __init__(self, componentname, componentinstancenumber, context=None, configurationparameters=None, num_worker_threads=1, topology=None):
         super().__init__(componentname, componentinstancenumber, context, configurationparameters, num_worker_threads, topology)
@@ -55,7 +66,7 @@ class ChandyLamportComponentModel(SnapshotComponentModel):
 
         # Broadcast the mark message
         mark_msg = GenericMessage(
-            GenericMessageHeader(ChandyLamportMessageTypes.MARK, None, None),
+            GenericMessageHeader(ChandyLamportMessageTypes.MARKER, None, None),
             None)
         self.send_msg(Event(self, EventTypes.MFRT, mark_msg))
 
@@ -87,10 +98,10 @@ class ChandyLamportComponentModel(SnapshotComponentModel):
 
     def msg_recv(self, event: Event):
         from_chnl = self.channel_of(event)
-        # If received message is of type MARK or GSU; process them separately
+        # If received message is of type MARKER or GSU; process them separately
         if type(contnt := event.eventcontent) == GenericMessage and\
            type(header := contnt.header) == GenericMessageHeader:
-            if header.messagetype == ChandyLamportMessageTypes.MARK:
+            if header.messagetype == ChandyLamportMessageTypes.MARKER:
                 self.mark_recv(from_chnl)
             elif header.messagetype == SnapshotMessageTypes.GSU:
                 self.gsu_recv(contnt.payload)

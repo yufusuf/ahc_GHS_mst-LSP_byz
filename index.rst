@@ -10,14 +10,15 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
-
-   docs/distalgname/distalgname.rst
-
+   docs/distalgname/distalgname
+   docs/rubric
+   docs/distalgname/code
 
 .. ATTENTION::
    For RST details, please refer to `reStructuredText Documentation <https://docutils.sourceforge.io/rst.html>`_.
+
 
 
 Indices and tables
