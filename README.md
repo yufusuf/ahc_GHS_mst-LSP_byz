@@ -34,5 +34,5 @@ There are some issues you have to address before starting implementation, please
 
 ## A helper tool for avoiding installation issues
 
-You can use `https://github.com/cengwins/ahc_dev_container.git` and follow the directive thereof.
+You can use [ahc_dev_container](https://github.com/cengwins/ahc_dev_container.git) and follow the directive thereof.
 
