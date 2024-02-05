@@ -26,6 +26,7 @@ There are some issues you have to address before starting implementation, please
 - do not edit anything in `build`, `_static`, `_templates` directories.  
 - in conf.py edit `project, copyright, author, release` fields.
 - list your modules in code.rst under docs/distalgname
+- An example implementation of the Snapshot algorithms are provided for your convenience, you can delete it.
 
 
 
