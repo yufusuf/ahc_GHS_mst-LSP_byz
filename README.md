@@ -32,4 +32,7 @@ There are some issues you have to address before starting implementation, please
 - List your modules in code.rst under docs/distalgname
 - An example implementation of the Snapshot algorithms are provided for your convenience, you can delete it.
 
+## A helper tool for avoiding installation issues
+
+You can use `https://github.com/cengwins/ahc_dev_container.git` and follow the directive thereof.
 
