@@ -91,19 +91,19 @@ class ChandyLamportComponentModel(SnapshotComponentModel):
             local_state = ChandyLamportState(self.componentinstancenumber,
                                              self.state, self.in_chnl_states)
             gsu_msg = GenericMessage(
-                GenericMessageHeader(SnapshotMessageTypes.GSU, None, None),
+                GenericMessageHeader(SnapshotMessageTypes.GLOBALSNAPSHOT, None, None),
                 local_state)
             self.send_msg(Event(self, EventTypes.MFRT, gsu_msg))
             self.gsu_recv(local_state)
 
     def msg_recv(self, event: Event):
         from_chnl = self.channel_of(event)
-        # If received message is of type MARKER or GSU; process them separately
+        # If received message is of type MARKER or GLOBALSNAPSHOT; process them separately
         if type(contnt := event.eventcontent) == GenericMessage and\
            type(header := contnt.header) == GenericMessageHeader:
             if header.messagetype == ChandyLamportMessageTypes.MARKER:
                 self.mark_recv(from_chnl)
-            elif header.messagetype == SnapshotMessageTypes.GSU:
+            elif header.messagetype == SnapshotMessageTypes.GLOBALSNAPSHOT:
                 self.gsu_recv(contnt.payload)
 
             return event

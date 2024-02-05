@@ -1,7 +1,7 @@
 """
 Distributed Snapshot Algorithms
 
-This module implements Chandy Lamport and Lai Yang algorithms.
+This module implemenTAKESNAPSHOT Chandy Lamport and Lai Yang algorithms.
 """
 
 
@@ -15,10 +15,10 @@ class SnapshotEventTypes(Enum):
     """ 
     Take snapshot event
     """ 
-    TS = "TS"
+    TAKESNAPSHOT = "TAKESNAPSHOT"
 
 class SnapshotMessageTypes(Enum):
-    GSU = "GSU"
+    GLOBALSNAPSHOT = "GLOBALSNAPSHOT"
 
 
 class SnapshotComponentModel(GenericModel):
@@ -37,7 +37,7 @@ class SnapshotComponentModel(GenericModel):
         self.recv_events = []
         self.chnls = set()
         self.init_snapshot = False
-        self.eventhandlers[SnapshotEventTypes.TS] = self.take_snapshot
+        self.eventhandlers[SnapshotEventTypes.TAKESNAPSHOT] = self.take_snapshot
 
     def on_connected_to_component(self, name, channel):
         """
@@ -59,21 +59,24 @@ class SnapshotComponentModel(GenericModel):
         """
         return self.recv_events.append(event)
 
+
+    def send_msg(self, event: Event):
+        """Generic send message function"""
+        pass
+    
     def msg_recv(self, event: Event):
         """Generic message received function"""
         pass
 
-    def send_msg(self, event: Event):
-        pass
-
     def send_gsu(self, local_state):
+        """Send GLOBALSNAPSHOT message """
         gsu_msg = GenericMessage(
-            GenericMessageHeader(SnapshotMessageTypes.GSU, None, None),
+            GenericMessageHeader(SnapshotMessageTypes.GLOBALSNAPSHOT, None, None),
             local_state)
         self.send_msg(Event(self, EventTypes.MFRT, gsu_msg))
 
     def gsu_recv(self, state):
-        # Redirect the GSU if we are not the source component of the snapshot
+        # Redirect the GLOBALSNAPSHOT if we are not the source component of the snapshot
         if state.component_id not in self.gsu_redirected_comps:
             self.gsu_redirected_comps.add(state.component_id)
             self.send_gsu(state)

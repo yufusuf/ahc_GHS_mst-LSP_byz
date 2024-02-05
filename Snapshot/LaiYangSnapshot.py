@@ -101,10 +101,10 @@ class LaiYangComponentModel(SnapshotComponentModel):
         from_chnl = self.channel_of(event)
         self.chnl_recv[from_chnl].append(event)
 
-        # If not a GSU message return the modified event
+        # If not a GLOBALSNAPSHOT message return the modified event
         if type(act_cntnt) != GenericMessage or\
            type(header := act_cntnt.header) != GenericMessageHeader or\
-               header.messagetype != SnapshotMessageTypes.GSU:
+               header.messagetype != SnapshotMessageTypes.GLOBALSNAPSHOT:
             return event
 
         self.gsu_recv(act_cntnt.payload)
