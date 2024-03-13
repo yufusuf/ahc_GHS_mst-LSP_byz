@@ -1,7 +1,7 @@
 .. include:: substitutions.rst
 
 ================================
-|DistAlgName|
+|GHS_mst-LSP_byz|
 ================================
 
 
