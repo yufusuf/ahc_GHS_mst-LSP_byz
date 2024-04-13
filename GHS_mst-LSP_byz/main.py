@@ -17,7 +17,7 @@ from adhoccomputing.Experimentation.Topology import Topology
 from adhoccomputing.Networking.LinkLayer.GenericLinkLayer import GenericLinkLayer
 from adhoccomputing.Networking.NetworkLayer.GenericNetworkLayer import GenericNetworkLayer
 from adhoccomputing.DistributedAlgorithms.Waves.AwerbuchDFS import WaveAwerbuchComponent
-from adhoccomputing.Networking.LogicalChannels.GenericChannel import GenericChannelWithLoopback
+from adhoccomputing.Networking.LogicalChannels.GenericChannel import GenericChannelWithLoopback, GenericChannel
 from adhoccomputing.DistributedAlgorithms.Election.Spira import ElectionSpiraComponent
 from GallagerHumbletSpira import MinimumSpanningTreeGHSComponent
 
@@ -71,15 +71,24 @@ def main():
     for i in range(5):
         G.add_node(i)
 
+    # G.add_edge(0, 1, weight=5)
+    # G.add_edge(0, 3, weight=6)
+    # # G.add_edge(0, 4, weight=1)
+    # G.add_edge(1, 2, weight=14)
+    # G.add_edge(1, 3, weight=7)
+    # G.add_edge(1, 4, weight=8)
+    # G.add_edge(2, 4, weight=19)
+    # G.add_edge(2, 3, weight=32)
+
     G.add_edge(0, 1, weight=5)
-    G.add_edge(0, 3, weight=6)
-    # G.add_edge(0, 4, weight=1)
-    G.add_edge(1, 2, weight=14)
+    G.add_edge(0, 2, weight=9)
+    G.add_edge(0, 3, weight=11)
+
     G.add_edge(1, 3, weight=7)
-    G.add_edge(1, 4, weight=8)
-    G.add_edge(2, 4, weight=19)
-    G.add_edge(2, 3, weight=32)
-    #
+    G.add_edge(1, 4, weight=15)
+
+    G.add_edge(2, 3, weight=3)
+
     # G = nx.random_geometric_graph(15, 0.5)
     pos = nx.spring_layout(G)
     options = {'font_size': 15,
@@ -92,7 +101,7 @@ def main():
 
     # print("Starting Awerbuch test")
     # topo is defined as a global variable
-    topo.construct_from_graph(G, AdHocNode, GenericChannelWithLoopback)
+    topo.construct_from_graph(G, AdHocNode, GenericChannel)
     topo.start()
 
     plt.savefig("graph.png")

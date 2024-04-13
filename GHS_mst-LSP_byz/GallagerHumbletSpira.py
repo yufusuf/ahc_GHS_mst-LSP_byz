@@ -48,9 +48,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
     def __init__(self, componentname, componentinstancenumber, context=None, configurationparamters=None, num_worker_threads=1, topology=None):
         super().__init__(componentname, componentinstancenumber, context,
                          configurationparamters, num_worker_threads, topology)
-        self.parent = -1
+        self.parent = self.componentinstancenumber
         self.id = self.componentinstancenumber
         self.topology = topology
+        self.connectq = []
+        self.testq = []
+        self.terminated = False
+
         # self.eventhandlers["test"] = self.test_handler
         # self.eventhandlers["connect"] = self.connect_handler
 
@@ -69,6 +73,7 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.count = 0
         self.test_edge = -1
         self.best_edge = -1
+        self.parent_report = 0
         self.best_weight = INF
         self.status = NodeStatus.FIND
 
@@ -110,25 +115,30 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
     def on_init(self, eventobj: Event):
         self.status = NodeStatus.FOUND
         lowest_weight_edge = self.find_lowest_weight_edge()
+        print(self.id, lowest_weight_edge)
         self.edges[lowest_weight_edge].change_state(EdgeStatus.BRANCH)
         self.count = 1
         msg = self.prepare_payload(
             ApplicationLayerMessageTypes.CONNECT, lowest_weight_edge, 0)
         self.send_down(Event(self, EventTypes.MFRT, msg))
 
-    def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
+    # def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
 
-    def on_exit(self, eventobj: Event):
-        # print branch edges to terminal
+    def print_edges(self):
         print(
-            f"\033[92m{self.id} is exiting, branch edges:\033[00m", end=" ")
+            f"\033[92m{self.id} branch edges:\033[00m", end=" ")
         for n in self.edges:
             if self.edges[n].st == EdgeStatus.BRANCH:
                 print(f"\033[92m{n}\033[00m",
                       f"\033[92m{self.edges[n]}\033[00m", end=", ")
         print()
 
+    def on_exit(self, eventobj: Event):
+        # print branch edges to terminal
+        self.print_edges()
+
     def on_message_from_bottom(self, eventobj: Event):
+        # time.sleep(0.01)
         message = eventobj.eventcontent
         hdr = message.header
         if hdr.messagetype == ApplicationLayerMessageTypes.CONNECT:
@@ -146,7 +156,8 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         elif hdr.messagetype == ApplicationLayerMessageTypes.CHANGEROOT:
             self.changeroot_handler(eventobj)
         elif hdr.messagetype == ApplicationLayerMessageTypes.TERMINATE:
-            self.terminate_handler(eventobj)
+            if not self.terminated:
+                self.terminate_handler(eventobj)
 
     def terminate_handler(self, eventobj: Event):
         message: GenericMessage = eventobj.eventcontent
@@ -156,12 +167,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.do_terminate()
 
     def do_terminate(self):
+        self.terminated = True
         for n in self.edges:
             if self.edges[n].st == EdgeStatus.BRANCH or True:
                 msg = self.prepare_payload(
                     ApplicationLayerMessageTypes.TERMINATE, n, ())
                 self.send_down(Event(self, EventTypes.MFRT, msg))
-        self.exit_process()
+        self.print_edges()
 
     def connect_handler(self, eventobj: Event):
         message: GenericMessage = eventobj.eventcontent
@@ -181,14 +193,15 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 ApplicationLayerMessageTypes.INITIATE, source, (self.edges[source].weight, self.level + 1, NodeStatus.FIND))
             self.send_down(Event(self, EventTypes.MFRT, msg))
         else:
-            time.sleep(0.5)
             # que the message back for later processing
-            hdr = GenericMessageHeader(ApplicationLayerMessageTypes.CONNECT,
-                                       source,
-                                       self.id)
-            payload = message.payload
-            msg = GenericMessage(hdr, payload)
-            self.send_down(Event(self, EventTypes.MFRT, msg))
+            # hdr = GenericMessageHeader(ApplicationLayerMessageTypes.CONNECT,
+            #                            source,
+            #                            self.id)
+            # payload = message.payload
+            # msg = GenericMessage(hdr, payload)
+            # self.send_down(Event(self, EventTypes.MFRT, msg))
+            if (source, level) not in self.connectq:
+                self.connectq.append((source, level))
 
     def iniate_handler(self, eventobj: Event):
         message: GenericMessage = eventobj.eventcontent
@@ -201,8 +214,15 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.state = st
         self.best_edge = -1
         self.best_weight = INF
+        self.parent_report = 0
         self.count = 1
         self.parent = source
+
+        for m in self.connectq:
+            (frm, oldlvl) = m
+            if oldlvl < self.level:
+                self.edges[frm].change_state(EdgeStatus.BRANCH)
+                self.connectq.remove(m)
 
         for n in self.edges:
             if n == source:
@@ -211,6 +231,12 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 msg = self.prepare_payload(
                     ApplicationLayerMessageTypes.INITIATE, n, (fn, level, st))
                 self.send_down(Event(self, EventTypes.MFRT, msg))
+
+        for m in self.testq:
+            (frm, tfn, tlvl) = m
+            if tlvl <= self.level:
+                self.reply_test(tfn, frm)
+                self.testq.remove(m)
 
         if st == NodeStatus.FIND:
             self.do_test()
@@ -227,16 +253,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.best_weight = weight
                 self.best_edge = source
             self.do_report()
+        elif self.state == NodeStatus.FIND:
+            self.parent_report = weight
         else:
-            if self.state == NodeStatus.FIND:
-                msg = self.prepare_payload(
-                    ApplicationLayerMessageTypes.REPORT, source, (weight))
-                self.send_down(Event(self, EventTypes.MFRT, msg))
-            else:
-                if self.best_weight < weight:
-                    self.do_changeroot()
-                elif weight == INF:
-                    self.do_terminate()
+            if self.best_weight < weight:
+                self.do_changeroot()
+            elif weight == INF:
+                self.do_terminate()
 
     def do_report(self):
         if self.count == sum([int(self.edges[n].st == EdgeStatus.BRANCH) for n in self.edges]) and self.test_edge == -1:
@@ -244,6 +267,8 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
             msg = self.prepare_payload(
                 ApplicationLayerMessageTypes.REPORT, self.parent, (self.best_weight))
             self.send_down(Event(self, EventTypes.MFRT, msg))
+            if self.parent_report > 0 and self.best_weight < self.parent_report:
+                self.do_changeroot()
 
     def changeroot_handler(self, eventobj):
         self.do_changeroot()
@@ -254,9 +279,14 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 ApplicationLayerMessageTypes.CHANGEROOT, self.best_edge, ())
             self.send_down(Event(self, EventTypes.MFRT, msg))
         else:
+            self.edges[self.best_edge].change_state(EdgeStatus.BRANCH)
             msg = self.prepare_payload(
                 ApplicationLayerMessageTypes.CONNECT, self.best_edge, (self.level))
             self.send_down(Event(self, EventTypes.MFRT, msg))
+            if (self.best_edge, self.level) in self.connectq:
+                msg = self.prepare_payload(ApplicationLayerMessageTypes.INITIATE, self.best_edge, (
+                    self.best_weight, self.level+1, NodeStatus.FIND))
+                self.connectq.remove((self.best_edge, self.level))
 
     def accept_handler(self, eventobj):
         message: GenericMessage = eventobj.eventcontent
@@ -284,19 +314,7 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         print(
             f"Node {self.id} received TEST message from Node {source}, payload: {message.payload}")
         if level <= self.level:
-            if self.fn != fn:
-                msg = self.prepare_payload(
-                    ApplicationLayerMessageTypes.ACCEPT, source, ())
-                self.send_down(Event(self, EventTypes.MFRT, msg))
-            else:
-                if self.edges[source].st == EdgeStatus.BASIC:
-                    self.edges[source].st = EdgeStatus.REJECTED
-                if source != self.test_edge:
-                    msg = self.prepare_payload(
-                        ApplicationLayerMessageTypes.REJECT, source, ())
-                    self.send_down(Event(self, EventTypes.MFRT, msg))
-                else:
-                    self.do_test()
+            self.reply_test(fn, source)
         else:
             # hdr = GenericMessageHeader(ApplicationLayerMessageTypes.TEST,
             #                            source,
@@ -304,8 +322,23 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
             # payload = message.payload
             # msg = GenericMessage(hdr, payload)
             # self.send_down(Event(self, EventTypes.MFRT, msg))
-            while level <= self.level:
-                time.sleep(0.5)
+
+            if (source, fn, level) not in self.testq:
+                self.testq.append((source, fn, level))
+
+    def reply_test(self, fn, source):
+        if self.fn != fn:
+            msg = self.prepare_payload(
+                ApplicationLayerMessageTypes.ACCEPT, source, ())
+            self.send_down(Event(self, EventTypes.MFRT, msg))
+        else:
+            self.edges[source].st = EdgeStatus.REJECTED
+            if source != self.test_edge:
+                msg = self.prepare_payload(
+                    ApplicationLayerMessageTypes.REJECT, source, ())
+                self.send_down(Event(self, EventTypes.MFRT, msg))
+            else:
+                self.do_test()
 
     def do_test(self):
         # Procedure FindMinimalOutgoing
