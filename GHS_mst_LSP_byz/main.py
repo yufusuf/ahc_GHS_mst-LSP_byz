@@ -42,7 +42,7 @@ class AdHocNode(GenericModel):
         super().__init__(componentname, componentid, topology=topo)
         self.components = []
         # SUBCOMPONENTS
-        self.appllayer = LamportShostakPeaseBroadcast(
+        self.appllayer = MinimumSpanningTreeGHSComponent(
             "ApplicationLayer", componentid, topology=topology)
         self.netlayer = GenericNetworkLayer(
             "NetworkLayer", componentid, topology=topology)
@@ -69,7 +69,7 @@ class AdHocNode(GenericModel):
 def main():
 
     G = nx.Graph()
-    for i in range(4):
+    for i in range(5):
         G.add_node(i)
 
     # G.add_edge(0, 1, weight=5)
@@ -81,23 +81,22 @@ def main():
     # G.add_edge(2, 4, weight=19)
     # G.add_edge(2, 3, weight=32)
 
-    # G.add_edge(0, 1, weight=5)
-    # G.add_edge(0, 2, weight=9)
-    # G.add_edge(0, 3, weight=11)
-    #
-    # G.add_edge(1, 3, weight=7)
-    # G.add_edge(1, 4, weight=15)
-    #
-    # G.add_edge(2, 3, weight=3)
-    #
+    G.add_edge(0, 1, weight=5)
+    G.add_edge(0, 2, weight=9)
+    G.add_edge(0, 3, weight=11)
 
-    G.add_edge(0, 1)
-    G.add_edge(0, 2)
-    G.add_edge(0, 3)
-    G.add_edge(1, 2)
-    G.add_edge(1, 3)
-    G.add_edge(2, 3)
+    G.add_edge(1, 3, weight=7)
+    G.add_edge(1, 4, weight=15)
 
+    G.add_edge(2, 3, weight=3)
+
+    # G.add_edge(0, 1)
+    # G.add_edge(0, 2)
+    # G.add_edge(0, 3)
+    # G.add_edge(1, 2)
+    # G.add_edge(1, 3)
+    # G.add_edge(2, 3)
+    #
     # G = nx.random_geometric_graph(15, 0.5)
     pos = nx.spring_layout(G)
     options = {'font_size': 15,
@@ -105,8 +104,8 @@ def main():
                }
 
     nx.draw(G, pos, with_labels=True, **options)
-    # labels = nx.get_edge_attributes(G, 'weight')
-    # nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, **options)
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, **options)
 
     # print("Starting Awerbuch test")
     # topo is defined as a global variable
