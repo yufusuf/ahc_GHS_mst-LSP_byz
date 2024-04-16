@@ -30,6 +30,6 @@ Our primary contributions consist of the following for both algorithms:
 
 - Detailed implementation of the algorithms on the AHCv2 platform.
 - Performance evaluation of the algorithms across diverse network topologies and usage scenarios.
-- Comparative analysis of the algorithms with previous approaches, highlighting strengths, weaknesses, and key insights.
+- Comparative analysis of the algorithms with other approaches, highlighting strengths, weaknesses, and key insights.
 
 .. [Fokking2013] Wan Fokkink, Distributed Algorithms An Intuitive Approach, The MIT Press Cambridge, Massachusetts London, England, 2013

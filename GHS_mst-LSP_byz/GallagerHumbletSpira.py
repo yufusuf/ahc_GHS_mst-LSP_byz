@@ -45,6 +45,10 @@ class Edge:
 
 
 class MinimumSpanningTreeGHSComponent(GenericModel):
+    """
+    Class for Minimum spanning tree implementation using GallagerHumbletSpira
+    """
+
     def __init__(self, componentname, componentinstancenumber, context=None, configurationparamters=None, num_worker_threads=1, topology=None):
         super().__init__(componentname, componentinstancenumber, context,
                          configurationparamters, num_worker_threads, topology)
@@ -78,6 +82,9 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.status = NodeStatus.FIND
 
     def find_lowest_weight_edge(self):
+        """
+        AAAAAAAAAAAAAA
+        """
         min = -1
         min_weight = INF
 

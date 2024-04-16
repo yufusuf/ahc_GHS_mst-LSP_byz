@@ -24,6 +24,7 @@ class LamportShostakPeaseBroadcast(GenericModel):
         self.is_commander = self.id == 0
         self.is_byzantine = self.id == 3
         self.k = 1
+        self.expected_messages = 0
 
     def on_init(self, eventobj: Event):
         if self.is_commander:
@@ -44,12 +45,11 @@ class LamportShostakPeaseBroadcast(GenericModel):
         return msg
 
     def broadcast_handler(self, eventobj: Event):
-        if self.k <= -1:
-            return
 
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         value = message.payload
+
         self.values.append(value)
         self.received_list.add(source)
         print(
@@ -62,8 +62,6 @@ class LamportShostakPeaseBroadcast(GenericModel):
                 msg = self.prepare_payload(
                     ApplicationLayerMessageTypes.BROADCAST, i, value)
                 self.send_down(Event(self, EventTypes.MFRT, msg))
-        self.k -= 1
-        if self.k == -1:
-            votes_count = sum(self.values)
-            print(
-                f"Node byzantine:({self.is_byzantine}) {self.id} has decided on value {votes_count > len(self.values)//2}, values: {self.values}")
+        votes_count = sum(self.values)
+        print(
+            f"Node byzantine:({self.is_byzantine}) {self.id} has decided on value {votes_count > len(self.values)//2}, values: {self.values}")
