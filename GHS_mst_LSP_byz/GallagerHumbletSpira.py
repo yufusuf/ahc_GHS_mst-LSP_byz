@@ -46,12 +46,15 @@ class Edge:
 
 class MinimumSpanningTreeGHSComponent(GenericModel):
     """
-    Class for Minimum spanning tree implementation using GallagerHumbletSpira
+    Class for Minimum spanning tree implementation using GallagerHumbletSpira, ahc model
     """
 
     def __init__(self, componentname, componentinstancenumber, context=None, configurationparamters=None, num_worker_threads=1, topology=None):
         super().__init__(componentname, componentinstancenumber, context,
                          configurationparamters, num_worker_threads, topology)
+        """
+        constructor for MST model
+        """
         self.parent = self.componentinstancenumber
         self.id = self.componentinstancenumber
         self.topology = topology
@@ -83,7 +86,9 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
 
     def find_lowest_weight_edge(self):
         """
-        AAAAAAAAAAAAAA
+        Returns the node that connected by lowest weight edge from the current node
+
+        :return: `id` of the node that connected by this node
         """
         min = -1
         min_weight = INF
@@ -95,6 +100,11 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         return min
 
     def find_lowest_weight_basic_edge(self):
+        """
+        Returns the node that connected by lowest weight basic edge from the current node
+
+        :return: `id` of the node that connected by this node
+        """
         min = -1
         min_weight = INF
         for id in self.edges:
@@ -113,6 +123,14 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         return msg
 
     def prepare_payload(self, msg_type, destination, payload):
+        """
+        Prepares a payload to be sent to other nodes
+
+        :param msg_type: :class:`ApplicationLayerMessageTypes`
+        :param destination: id for the destination node
+        :param payload: message to be sent
+
+        """
         hdr = GenericMessageHeader(msg_type,
                                    self.id,
                                    destination)
@@ -132,6 +150,9 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
     # def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
 
     def print_edges(self):
+        """
+        Prints branch edges of the current node
+        """
         print(
             f"\033[92m{self.id} branch edges:\033[00m", end=" ")
         for n in self.edges:
@@ -334,6 +355,12 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.testq.append((source, fn, level))
 
     def reply_test(self, fn, source):
+        """
+        Procedure for handling incoming test messages
+
+        :param fn: fragment id of the source node
+        :param source: id of the source node
+        """
         if self.fn != fn:
             msg = self.prepare_payload(
                 ApplicationLayerMessageTypes.ACCEPT, source, ())
@@ -349,6 +376,11 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
 
     def do_test(self):
         # Procedure FindMinimalOutgoing
+        """
+        Finds minimial outgoing edge, if we dont have a basic edge 
+        we report it, otherwise we send test message to that node
+
+        """
         edge_index = self.find_lowest_weight_basic_edge()
         if edge_index == -1:
             self.test_edge = -1
