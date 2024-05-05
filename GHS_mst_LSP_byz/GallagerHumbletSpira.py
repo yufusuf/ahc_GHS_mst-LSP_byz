@@ -138,6 +138,11 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         return msg
 
     def on_init(self, eventobj: Event):
+        """
+        on_init works after component initialized, starts every node
+        as initiator
+
+        """
         self.status = NodeStatus.FOUND
         lowest_weight_edge = self.find_lowest_weight_edge()
         print(self.id, lowest_weight_edge)
@@ -167,6 +172,12 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
 
     def on_message_from_bottom(self, eventobj: Event):
         # time.sleep(0.01)
+        """
+
+        called when message comes to component from bottom layer,
+        handlers are called according to the message type
+
+        """
         message = eventobj.eventcontent
         hdr = message.header
         if hdr.messagetype == ApplicationLayerMessageTypes.CONNECT:
@@ -188,6 +199,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.terminate_handler(eventobj)
 
     def terminate_handler(self, eventobj: Event):
+        """
+
+        Terminate handler
+
+        :param eventobj: includes source and message payload
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         print(
@@ -195,6 +213,11 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.do_terminate()
 
     def do_terminate(self):
+        """
+
+        executes terminate, sends terminate message to branch edges
+
+        """
         self.terminated = True
         for n in self.edges:
             if self.edges[n].st == EdgeStatus.BRANCH or True:
@@ -204,6 +227,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.print_edges()
 
     def connect_handler(self, eventobj: Event):
+        """
+        CONNECT message handler
+
+        :param eventobj: includes message that has source and level
+
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         level = message.payload
@@ -232,6 +262,14 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.connectq.append((source, level))
 
     def iniate_handler(self, eventobj: Event):
+        """
+
+        INITIATE message handler
+
+        :param eventobj: includes message that has source and level and name of the source
+
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         (fn, level, st) = message.payload
@@ -270,6 +308,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
             self.do_test()
 
     def report_handler(self, eventobj):
+        """
+
+        REPORT message handler
+
+        :param eventobj: includes source and weight of the edge  
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         (weight) = message.payload
@@ -290,6 +335,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.do_terminate()
 
     def do_report(self):
+        """
+
+        Executes report procedure
+        if node found all of its edges to be branch it sends a report to its parent
+
+
+        """
         if self.count == sum([int(self.edges[n].st == EdgeStatus.BRANCH) for n in self.edges]) and self.test_edge == -1:
             self.state = NodeStatus.FOUND
             msg = self.prepare_payload(
@@ -302,6 +354,11 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.do_changeroot()
 
     def do_changeroot(self):
+        """
+
+        sends CHANGEROOT message to best edge if its branch edge or sets its best edge to branch 
+
+        """
         if self.edges[self.best_edge].st == EdgeStatus.BRANCH:
             msg = self.prepare_payload(
                 ApplicationLayerMessageTypes.CHANGEROOT, self.best_edge, ())
@@ -317,6 +374,14 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
                 self.connectq.remove((self.best_edge, self.level))
 
     def accept_handler(self, eventobj):
+        """
+
+        ACCEPT message handler
+        sets best edge of with the source and reports the edge to parent
+
+        :param eventobj: includes source 
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         print(
@@ -328,6 +393,14 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.do_report()
 
     def reject_handler(self, eventobj):
+        """
+
+        REJECT message handler
+        rejects the incoming edge from source to be tree branch
+
+        :param eventobj: includes source 
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         print(
@@ -336,6 +409,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.do_test()
 
     def test_handler(self, eventobj):
+        """
+
+        TEST message handler
+
+        :param eventobj: includes name of the edge and level
+
+        """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         (fn, level) = message.payload
@@ -358,7 +438,7 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         """
         Procedure for handling incoming test messages
 
-        :param fn: fragment id of the source node
+        :param fn: name of the source node
         :param source: id of the source node
         """
         if self.fn != fn:
