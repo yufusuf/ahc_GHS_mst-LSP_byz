@@ -1,12 +1,12 @@
 
-__author__ = "One solo developer"
-__authors__ = ["Mahmoud Alasmar"]
-__contact__ = "mahmoud.asmar@metu.edu.tr"
-__date__ = "2021/05/26"
-__license__ = "GPLv3"
-__maintainer__ = "developer"
-__status__ = "Production"
-__version__ = "0.0.1"
+# __author__ = "One solo developer"
+# __authors__ = ["Mahmoud Alasmar"]
+# __contact__ = "mahmoud.asmar@metu.edu.tr"
+# __date__ = "2024/05/26"
+# __license__ = "GPLv3"
+# __maintainer__ = "developer"
+# __status__ = "Production"
+# __version__ = "0.0.1"
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -68,6 +68,8 @@ class AdHocNode(GenericModel):
 
 def main():
 
+    # run several times to see result, sometimes deadlocks occur
+    # you should see the branch edges with green text
     G = nx.Graph()
     for i in range(5):
         G.add_node(i)
@@ -97,7 +99,6 @@ def main():
     # G.add_edge(1, 3)
     # G.add_edge(2, 3)
     #
-    # G = nx.random_geometric_graph(15, 0.5)
     pos = nx.spring_layout(G)
     options = {'font_size': 15,
                'node_size': 800,
@@ -107,8 +108,6 @@ def main():
     labels = nx.get_edge_attributes(G, 'weight')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, **options)
 
-    # print("Starting Awerbuch test")
-    # topo is defined as a global variable
     topo.construct_from_graph(G, AdHocNode, GenericChannel)
     topo.start()
 

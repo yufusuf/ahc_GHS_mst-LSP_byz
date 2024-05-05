@@ -18,21 +18,24 @@ class LamportShostakPeaseBroadcast(GenericModel):
         self.id = componentinstancenumber
         self.topology = topology
         self.N = self.topology.G.number_of_nodes()
-        self.round = 1
+        self.round = 0
         self.received_list = set()
         self.values = []
         self.is_commander = self.id == 0
-        self.is_byzantine = self.id == 3
-        self.k = 1
-        self.expected_messages = 0
+        self.is_byzantine = self.id == 3 or self.id == 5
+        # set this to byzantine node count
+        self.k = 2
+        self.round_mes_count = 0
 
     def on_init(self, eventobj: Event):
         if self.is_commander:
             for i in range(self.N):
                 if i != self.id:
                     msg = self.prepare_payload(
-                        ApplicationLayerMessageTypes.BROADCAST, i, 0)
+                        ApplicationLayerMessageTypes.BROADCAST, i, 1)
                     self.send_down(Event(self, EventTypes.MFRT, msg))
+            print(
+                f"[ROUND {self.round}] Node commander {self.id} has decided on value 1")
 
     def on_message_from_bottom(self, eventobj: Event):
         self.broadcast_handler(eventobj)
@@ -45,23 +48,33 @@ class LamportShostakPeaseBroadcast(GenericModel):
         return msg
 
     def broadcast_handler(self, eventobj: Event):
-
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
         value = message.payload
 
+        self.round_mes_count += 1
+
         self.values.append(value)
+        # if source in self.received_list:
+        #     return
         self.received_list.add(source)
         print(
-            f"[ROUND {self.k}] Node {self.id} received message from Node {source}, payload: {message.payload}, received_list: {self.received_list}")
+            f"[ROUND {self.round}] Node {self.id} received message from Node {source}, payload: {message.payload}, received_list: {self.received_list}, values: {self.values}")
+        if (self.round == 0 and self.round_mes_count == 1) or (self.round > 0 and (self.N - self.round - 1 == self.round_mes_count)):
+            self.do_broadcast(value)
+            self.round_mes_count = 0
+            self.round += 1
+        if self.k == self.round:
+            votes_count = sum(self.values)
+            print(
+                f"Node byzantine:({self.is_byzantine}) {self.id} has decided on value {votes_count > len(self.values)//2}, values: {self.values}")
 
+    def do_broadcast(self, value):
+        if self.is_byzantine:
+            value = 1 if value == 0 else 0
         for i in range(self.N):
             if i != self.id and i not in self.received_list:
-                if self.is_byzantine:
-                    value = 1 if value == 0 else 0
                 msg = self.prepare_payload(
                     ApplicationLayerMessageTypes.BROADCAST, i, value)
                 self.send_down(Event(self, EventTypes.MFRT, msg))
-        votes_count = sum(self.values)
-        print(
-            f"Node byzantine:({self.is_byzantine}) {self.id} has decided on value {votes_count > len(self.values)//2}, values: {self.values}")
+        time.sleep(0.1)
