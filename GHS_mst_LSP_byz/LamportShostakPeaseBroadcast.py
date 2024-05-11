@@ -18,14 +18,13 @@ class LamportShostakPeaseBroadcast(GenericModel):
         self.id = componentinstancenumber
         self.topology = topology
         self.N = self.topology.G.number_of_nodes()
-        self.round = 0
-        self.received_list = set()
-        self.values = []
         self.is_commander = self.id == 0
         self.is_byzantine = self.id == 3 or self.id == 5
         # set this to byzantine node count
         self.k = 2
-        self.round_mes_count = 0
+        self.received_list = [set()] * self.k
+        self.values = []
+        self.decided = False
 
     def on_init(self, eventobj: Event):
         """
@@ -33,18 +32,22 @@ class LamportShostakPeaseBroadcast(GenericModel):
 
         """
         if self.is_commander:
+            time.sleep(0.5)
             for i in range(self.N):
                 if i != self.id:
                     msg = self.prepare_payload(
-                        ApplicationLayerMessageTypes.BROADCAST, i, 1)
+                        ApplicationLayerMessageTypes.BROADCAST, i, (True, 0))
                     self.send_down(Event(self, EventTypes.MFRT, msg))
             print(
-                f"[ROUND {self.round}] Node commander {self.id} has decided on value 1")
+                f"[ROUND 0] Node commander {self.id} has decided on value 1")
+            self.decided = True
 
     def on_message_from_bottom(self, eventobj: Event):
         """
         Calls the broadcast_handler
         """
+        if self.decided:
+            return
         self.broadcast_handler(eventobj)
 
     def prepare_payload(self, msg_type, destination, payload):
@@ -72,26 +75,18 @@ class LamportShostakPeaseBroadcast(GenericModel):
         """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
-        value = message.payload
-
-        self.round_mes_count += 1
-
-        self.values.append(value)
-        # if source in self.received_list:
-        #     return
-        self.received_list.add(source)
+        (value, pulse) = message.payload
         print(
-            f"[ROUND {self.round}] Node {self.id} received message from Node {source}, payload: {message.payload}, received_list: {self.received_list}, values: {self.values}")
-        if (self.round == 0 and self.round_mes_count == 1) or (self.round > 0 and (self.N - self.round - 1 == self.round_mes_count)):
-            self.do_broadcast(value)
-            self.round_mes_count = 0
-            self.round += 1
-        if self.k == self.round:
-            votes_count = sum(self.values)
-            print(
-                f"Node byzantine:({self.is_byzantine}) {self.id} has decided on value {votes_count > len(self.values)//2}, values: {self.values}")
+            f"[ROUND {pulse}] Node {self.id} received message from Node {source}, value: {value}")
+        if pulse < self.k:
+            self.received_list[pulse].add(source)
+            self.values.append(value)
+            value = not value if self.is_byzantine else value
+            self.do_broadcast(value, pulse)
+        print(
+            f"[ROUND {pulse}] Node {self.id} is deciding on values: f{self.values} => {sum([int(i) for i in self.values]) > len(self.values)//2}")
 
-    def do_broadcast(self, value):
+    def do_broadcast(self, value, pulse):
         """
 
         sends broadcast messages to other nodes 
@@ -99,11 +94,11 @@ class LamportShostakPeaseBroadcast(GenericModel):
         :param value: value to be broadcasted
 
         """
-        if self.is_byzantine:
-            value = 1 if value == 0 else 0
+        print(
+            f"[ROUND {pulse}] Node {self.id} broadcasting to {list(filter(lambda x: x not in self.received_list[pulse] and x != self.id, range(self.N)))}")
         for i in range(self.N):
-            if i != self.id and i not in self.received_list:
+            if i != self.id and i not in self.received_list[pulse]:
+                time.sleep(0.01)
                 msg = self.prepare_payload(
-                    ApplicationLayerMessageTypes.BROADCAST, i, value)
+                    ApplicationLayerMessageTypes.BROADCAST, i, (value, pulse + 1))
                 self.send_down(Event(self, EventTypes.MFRT, msg))
-        time.sleep(0.1)

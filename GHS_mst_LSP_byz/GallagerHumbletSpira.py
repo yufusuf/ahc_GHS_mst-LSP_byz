@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 
-INF = sys.maxsize
+INF = 9999
 
 
 class ApplicationLayerMessageTypes(Enum):
@@ -284,11 +284,17 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         self.count = 1
         self.parent = source
 
+        temp = []
+
         for m in self.connectq:
             (frm, oldlvl) = m
             if oldlvl < self.level:
                 self.edges[frm].change_state(EdgeStatus.BRANCH)
+                temp.append(m)
+        for m in temp:
+            if m in self.connectq:
                 self.connectq.remove(m)
+        temp.clear()
 
         for n in self.edges:
             if n == source:
@@ -302,6 +308,9 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
             (frm, tfn, tlvl) = m
             if tlvl <= self.level:
                 self.reply_test(tfn, frm)
+                temp.append(m)
+        for m in temp:
+            if m in self.testq:
                 self.testq.remove(m)
 
         if st == NodeStatus.FIND:
@@ -332,6 +341,7 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
             if self.best_weight < weight:
                 self.do_changeroot()
             elif weight == INF:
+                print(f"Node {self.id} sending TERMINATE to all")
                 self.do_terminate()
 
     def do_report(self):
