@@ -6,48 +6,62 @@ Implementation, Results and Discussion
 Implementation and Methodology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. Writing the methodology lies at the core of the paper, and fulfills one of the basic principles underlying the scientific method. Any scientific paper needs to be verifiable by other researchers, so that they can review the results by replicating the experiment and guaranteeing the validity. To assist this, you need to give a completely accurate description of the equipment and the techniques used for gathering the data [Shuttleworth2016]_.
+To implement the Minimum Spanning Tree (MST) algorithm, we developed a simulation within a Python environment emulating an ad hoc network setting. In this simulation, each node was represented as an individual process capable of communication through a custom messaging system. The central focus of this implementation was the creation and handling of specific message types, including INITIATE, CONNECT, TEST, REPORT, ACCEPT, and REJECT messages.
 
-.. Other scientists are not going to take your word for it, and they want to be able to evaluate whether your methodology is sound. In addition, it is useful for the reader to understand how you obtained your data, because it allows them to evaluate the quality of the results. For example, if you were trying to obtain data about shopping preferences, you will obtain different results from a multiple-choice questionnaire than from a series of open interviews. Writing methodology allows the reader to make their own decision about the validity of the data. If the research about shopping preferences were built upon a single case study, it would have little external validity, and the reader would treat the results with the contempt that they deserve [Shuttleworth2016]_.
+The simulation was designed to validate the algorithm's functionality across two distinct network topologies: fully connected and randomized networks. In the fully connected topology, every node had direct communication links with every other node, simulating a dense network structure. Conversely, the randomized network topology featured varying degrees of connectivity and randomness, reflecting real-world ad hoc network scenarios.
 
-.. Describe the materials and equipment used in the research. Explain how the samples were gathered, any randomization techniques and how the samples were prepared. Explain how the measurements were made and what calculations were performed upon the raw data. Describe the statistical techniques used upon the data [Shuttleworth2016]_.
+The performance of the implemented MST algorithm was rigorously evaluated and analyzed in the results section. This evaluation considered metrics such as message complexity, convergence time. Also, to check if the found mst was correct, classical Kruskal's algorithm ran on network to compare results. 
 
-Present any important details of your implementation here.
+For LSP i could only be able to implement where k = 1, because I couldnt find a simple way to implement complex recursive steps taken to compute the broadcasting without the help of keeping global states across network in ahc library. This led to solutions to trivial cases of mitigation of 1 byzantine node in N>3 nodes of networks.
 
 Results
 ~~~~~~~~
 
-Present your AHCv2 run results, plot figures.
+The implementation was evaluated using an Intel i5-12400F processor. Convergence time and message complexity were measured and recorded in a table for analysis. The evaluation utilized the NetworkX library to simulate two distinct network topologies: a random graph and a fully connected graph. The fully connected graph, where nodes communicate extensively, resulted in increased message passing and longer convergence times compared to the random graph topology where not every node is connected to each other.
 
-
-.. This is probably the most variable part of any research paper, and depends upon the results and aims of the experiment. For quantitative research, it is a presentation of the numerical results and data, whereas for qualitative research it should be a broader discussion of trends, without going into too much detail. For research generating a lot of results, then it is better to include tables or graphs of the analyzed data and leave the raw data in the appendix, so that a researcher can follow up and check your calculations. A commentary is essential to linking the results together, rather than displaying isolated and unconnected charts, figures and findings. It can be quite difficulty to find a good balance between the results and the discussion section, because some findings, especially in a quantitative or descriptive experiment, will fall into a grey area. As long as you not repeat yourself to often, then there should be no major problem. It is best to try to find a middle course, where you give a general overview of the data and then expand upon it in the discussion - you should try to keep your own opinions and interpretations out of the results section, saving that for the discussion [Shuttleworth2016]_.
-
-
-.. .. image:: figures/CDFInterferecePowerFromKthNode2.png
-  :width: 400
-  :alt: Impact of interference power
-
-
-.. .. list-table:: Title
-   :widths: 25 25 50
+.. list-table:: GHS algorithm performance and message complexity
+   :widths: 25 25 25 25 25
    :header-rows: 1
 
-   * - Heading row 1, column 1
-     - Heading row 1, column 2
-     - Heading row 1, column 3
-   * - Row 1, column 1
-     -
-     - Row 1, column 3
-   * - Row 2, column 1
-     - Row 2, column 2
-     - Row 2, column 3
+   * - node count 
+     - time(random-graph) 
+     - time(fully-connected) 
+     - message count(random-graph)
+     - message count(fully-connected)
+   * - 10 
+     - 0.2
+     - 0.2
+     - 76
+     - 114
+   * - 40 
+     - 0.4
+     - 0.5
+     - 783
+     - 1589
+   * - 50 
+     - 0.5
+     - 0.82
+     - 1089
+     - 2430
+   * - 60 
+     - 0.77
+     - 0.8
+     - 1615
+     - 3585
+   * - 80 
+     - 1.6
+     - 2.26
+     - 3040
+     - 6340
+
 
 Discussion
 ~~~~~~~~~~
 
-Present and discuss main learning points.
+The results of the study demonstrate the effectiveness of the GHS algorithm for constructing minimum spanning trees (MSTs) across various network topologies. By implementing the GHS algorithm in simulated ad hoc networks with different structures, including fully connected and random graphs, we observed its capability in efficiently identifying MSTs.
+
+Furthermore, the evaluation validated the theoretical computations regarding message counts associated with the GHS algorithm. The measured message complexity aligned with the expected theoretical values, affirming the algorithm's computational efficiency and correctness in terms of message exchange.
+
+Overall, the findings underscore the practical utility and reliability of the GHS algorithm for MST construction, offering valuable insights into its performance across diverse network configurations. Further exploration could focus on optimizing the algorithm's execution and scalability for larger network sizes and complex topologies.
 
 
-
-
-.. [Shuttleworth2016] M. Shuttleworth. (2016) Writing methodology. `Online <https://explorable.com/writing-methodology>`_.

@@ -145,7 +145,6 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         """
         self.status = NodeStatus.FOUND
         lowest_weight_edge = self.find_lowest_weight_edge()
-        print(self.id, lowest_weight_edge)
         self.edges[lowest_weight_edge].change_state(EdgeStatus.BRANCH)
         self.count = 1
         msg = self.prepare_payload(
@@ -158,12 +157,13 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         """
         Prints branch edges of the current node
         """
+        res = []
         print(
-            f"\033[92m{self.id} branch edges:\033[00m", end=" ")
+            f"\033[92m{self.id}: \033[00m", end=" ")
         for n in self.edges:
             if self.edges[n].st == EdgeStatus.BRANCH:
-                print(f"\033[92m{n}\033[00m",
-                      f"\033[92m{self.edges[n]}\033[00m", end=", ")
+                print(
+                    f"\033[92m{self.id} -- {n} == {self.edges[n].weight}\033[00m", end=', ')
         print()
 
     def on_exit(self, eventobj: Event):
@@ -208,8 +208,8 @@ class MinimumSpanningTreeGHSComponent(GenericModel):
         """
         message: GenericMessage = eventobj.eventcontent
         source = message.header.messagefrom
-        print(
-            f"Node {self.id} received TERMINATE message from Node {source}, payload: {message.payload}")
+        # print(
+        #     f"Node {self.id} received TERMINATE message from Node {source}, payload: {message.payload}")
         self.do_terminate()
 
     def do_terminate(self):

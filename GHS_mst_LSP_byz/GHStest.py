@@ -21,6 +21,7 @@ from adhoccomputing.Networking.LogicalChannels.GenericChannel import GenericChan
 from adhoccomputing.DistributedAlgorithms.Election.Spira import ElectionSpiraComponent
 from GallagerHumbletSpira import MinimumSpanningTreeGHSComponent
 from LamportShostakPeaseBroadcast import LamportShostakPeaseBroadcast
+from KruskalTest import *
 
 number_mesg = 0
 topo = Topology()
@@ -70,9 +71,10 @@ def main():
 
     # run several times to see result, sometimes deadlocks occur
     # you should see the branch edges with green text
-    G = nx.Graph()
-    for i in range(5):
-        G.add_node(i)
+    # n = 10
+    # G = nx.Graph()
+    # for i in range(n):
+    #     G.add_node(i)
 
     # G.add_edge(0, 1, weight=5)
     # G.add_edge(0, 3, weight=6)
@@ -83,36 +85,56 @@ def main():
     # G.add_edge(2, 4, weight=19)
     # G.add_edge(2, 3, weight=32)
 
-    G.add_edge(0, 1, weight=5)
-    G.add_edge(0, 2, weight=9)
-    G.add_edge(0, 3, weight=11)
-
-    G.add_edge(1, 3, weight=7)
-    G.add_edge(1, 4, weight=15)
-
-    G.add_edge(2, 3, weight=3)
-
-    # G.add_edge(0, 1)
-    # G.add_edge(0, 2)
-    # G.add_edge(0, 3)
-    # G.add_edge(1, 2)
-    # G.add_edge(1, 3)
-    # G.add_edge(2, 3)
+    # G.add_edge(0, 1, weight=5)
+    # G.add_edge(0, 2, weight=9)
+    # G.add_edge(0, 3, weight=11)
     #
-    pos = nx.spring_layout(G)
+    # G.add_edge(1, 3, weight=7)
+    # G.add_edge(1, 4, weight=15)
+    #
+    # G.add_edge(2, 3, weight=3)
+    #
+
+    # w = 50
+    # for i in range(n):
+    #     for j in range(i):
+    #         if i*j % 2 == 1:
+    #             G.add_edge(i, j, weight=w)
+    #         w += 1
+    # DISTRIBUTED TEST
+    start = time.time()
+    w = 50
+    n = 80
+    G = nx.random_geometric_graph(n, 0.5)
+    for (u, v) in G.edges():
+        G.edges[u, v]['weight'] = w
+        w += 1
     options = {'font_size': 15,
                'node_size': 800,
                }
 
+    pos = nx.spring_layout(G)
     nx.draw(G, pos, with_labels=True, **options)
-    labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, **options)
+    # labels = nx.get_edge_attributes(G, 'weight')
+    # nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, **options)
 
     topo.construct_from_graph(G, AdHocNode, GenericChannel)
     topo.start()
+    end = time.time()
 
     plt.savefig("graph.png")
     plt.show()  # while (True): pass
+
+    # KRUSKALS FOR VERIFICATION
+    # print("===== KRUSKAL TEST =====")
+    # g = Graph(n)
+    # w = 60
+    # for (u, v) in G.edges():
+    #     g.addEdge(u, v, w)
+    #     w += 1
+    # # Function call
+    # g.KruskalMST()
+    print(f"Time: {end - start}")
 
 
 if __name__ == "__main__":

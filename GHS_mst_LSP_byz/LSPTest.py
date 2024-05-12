@@ -68,7 +68,7 @@ class AdHocNode(GenericModel):
 
 def main():
 
-    n = 6
+    n = 4
     G = nx.Graph()
     for i in range(n):
         G.add_node(i)

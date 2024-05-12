@@ -1,0 +1,7 @@
+GHS
+node count - time(random) - time(FC) - message_count(FC) - message_count(random)
+10              0.2             0.2	114			76
+40              0.4             0.5 	1589			783
+50              0.5             0.82    2430			1089
+60              0.77            0.8	3585			1615
+80              1.6             2.26	6340			3040

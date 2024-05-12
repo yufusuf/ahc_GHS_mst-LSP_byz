@@ -19,8 +19,7 @@ class LamportShostakPeaseBroadcast(GenericModel):
         self.topology = topology
         self.N = self.topology.G.number_of_nodes()
         self.is_commander = self.id == 0
-        self.is_byzantine = self.id == 3 or self.id == 5
-        # set this to byzantine node count
+        self.is_byzantine = self.id == 3
         self.k = 2
         self.received_list = [set()] * self.k
         self.values = []
@@ -82,9 +81,11 @@ class LamportShostakPeaseBroadcast(GenericModel):
             self.received_list[pulse].add(source)
             self.values.append(value)
             value = not value if self.is_byzantine else value
-            self.do_broadcast(value, pulse)
-        print(
-            f"[ROUND {pulse}] Node {self.id} is deciding on values: f{self.values} => {sum([int(i) for i in self.values]) > len(self.values)//2}")
+            if pulse + 1 < self.k:
+                self.do_broadcast(value, pulse + 1)
+            elif len(self.values) == self.N - 1:
+                print(
+                    f"[ROUND {pulse}] Node {self.id} is deciding on values: f{self.values} => {sum([int(i) for i in self.values]) > len(self.values)//2}")
 
     def do_broadcast(self, value, pulse):
         """
@@ -95,10 +96,10 @@ class LamportShostakPeaseBroadcast(GenericModel):
 
         """
         print(
-            f"[ROUND {pulse}] Node {self.id} broadcasting to {list(filter(lambda x: x not in self.received_list[pulse] and x != self.id, range(self.N)))}")
+            f"[ROUND {pulse}] Node {self.id} broadcasting {value} to {list(filter(lambda x: x not in self.received_list[pulse] and x != self.id, range(self.N)))}")
         for i in range(self.N):
             if i != self.id and i not in self.received_list[pulse]:
-                time.sleep(0.01)
                 msg = self.prepare_payload(
-                    ApplicationLayerMessageTypes.BROADCAST, i, (value, pulse + 1))
+                    ApplicationLayerMessageTypes.BROADCAST, i, (value, pulse))
                 self.send_down(Event(self, EventTypes.MFRT, msg))
+        time.sleep(0.1)
